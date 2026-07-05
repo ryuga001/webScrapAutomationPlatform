@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# webbot task data (runtime-generated)
+/data
+
+# webbot run screenshots (runtime-generated)
+/public/runs
+
+# webbot firefox working profile (copied from your real profile)
+/data/firefox-profile

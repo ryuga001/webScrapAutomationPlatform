@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "WebBot Scraper (demo)",
+  "version": "0.1.0",
+  "description": "Type a CSS selector and scrape matching elements from the current page — using your logged-in session.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "WebBot Scraper"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "webbot-scraper-demo@example.com"
+    }
+  }
+}
