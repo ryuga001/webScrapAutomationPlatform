@@ -8,7 +8,6 @@ import {
   ReactFlowProvider,
   Background,
   Controls,
-  MiniMap,
   addEdge,
   reconnectEdge,
   useNodesState,
@@ -27,6 +26,7 @@ import { DeletableEdge } from "@/components/workflow/DeletableEdge";
 import { ConfigModal } from "@/components/workflow/ConfigModal";
 import { useAuth } from "@/components/AuthProvider";
 import { RequireAuth } from "@/components/RequireAuth";
+import { Logo } from "@/components/Logo";
 import { getNodeType } from "@/lib/nodes";
 import { defaultConfig } from "@/lib/node-format";
 
@@ -252,9 +252,12 @@ function Editor() {
     <div className="flex h-screen flex-col bg-surface">
       <header className="z-50 flex h-16 items-center justify-between border-b border-outline-variant bg-surface px-6">
         <div className="flex items-center gap-4">
-          <span className="font-display text-xl font-bold tracking-tight text-primary">
-            WebBot
-          </span>
+          <Link href="/workflows" className="flex items-center gap-2">
+            <Logo size={28} className="rounded-md" />
+            <span className="font-display text-xl font-bold tracking-tight text-primary">
+              WebBot
+            </span>
+          </Link>
           <div className="h-6 w-px bg-outline-variant" />
           <nav className="flex items-center gap-2 text-sm">
             <Link href="/workflows" className="text-on-surface-variant hover:text-primary">
@@ -305,15 +308,11 @@ function Editor() {
               edgeTypes={edgeTypes}
               defaultEdgeOptions={EDGE_OPTIONS}
               fitView
+              fitViewOptions={{ maxZoom: 1, padding: 0.3 }}
               proOptions={{ hideAttribution: true }}
             >
               <Background gap={28} size={1.4} color="#c3cbe6" />
               <Controls className="!rounded-xl !border !border-outline-variant !bg-surface-container !shadow-lg" />
-              <MiniMap
-                pannable
-                className="!rounded-xl !border !border-outline-variant !bg-surface-container"
-                nodeColor="#7bd1fa"
-              />
             </ReactFlow>
           )}
 

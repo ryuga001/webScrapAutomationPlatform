@@ -12,7 +12,7 @@ export function Palette({ onAdd }: { onAdd: (type: string) => void }) {
   const q = query.trim().toLowerCase();
 
   return (
-    <aside className="z-40 flex h-full w-[280px] flex-col border-r border-outline-variant bg-surface-container">
+    <aside className="z-40 flex h-full w-[232px] flex-col border-r border-outline-variant bg-surface-container">
       <div className="border-b border-outline-variant p-4">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-on-surface-variant">
@@ -58,10 +58,10 @@ export function Palette({ onAdd }: { onAdd: (type: string) => void }) {
                     key={n.type}
                     onClick={() => onAdd(n.type)}
                     title={n.description}
-                    className={`flex w-full items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-low p-2 text-left transition-colors ${cat.paletteHover}`}
+                    className={`flex w-full items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-low px-2.5 py-1.5 text-left transition-all duration-100 hover:shadow-sm active:scale-[0.97] active:shadow-none ${cat.paletteHover}`}
                   >
-                    <NodeIcon name={n.icon} className={cat.text} size={18} />
-                    <span className="text-sm text-on-surface">{n.label}</span>
+                    <NodeIcon name={n.icon} className={`${cat.text} shrink-0`} size={16} />
+                    <span className="truncate text-[13px] text-on-surface">{n.label}</span>
                   </button>
                 ))}
               </div>

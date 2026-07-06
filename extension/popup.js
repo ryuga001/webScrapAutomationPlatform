@@ -10,7 +10,38 @@ const downloadsEl = document.getElementById("downloads");
 const runBtn = document.getElementById("run");
 const refreshBtn = document.getElementById("refresh");
 
+// Collapsible run-progress panel.
+const progressEl = document.getElementById("progress");
+const progressToggleEl = document.getElementById("progress-toggle");
+const progressBadgeEl = document.getElementById("progress-badge");
+const progressEmptyEl = document.getElementById("progress-empty");
+
 let workflows = [];
+let progressOpen = false;
+let pendingSteps = 0; // unseen progress lines while collapsed
+
+function updateBadge() {
+  if (!progressOpen && pendingSteps > 0) {
+    progressBadgeEl.textContent = pendingSteps > 99 ? "99+" : String(pendingSteps);
+    progressBadgeEl.classList.remove("hidden");
+  } else {
+    progressBadgeEl.classList.add("hidden");
+  }
+}
+
+function setProgressOpen(open) {
+  progressOpen = open;
+  progressEl.classList.toggle("hidden", !open);
+  progressToggleEl.querySelector(".ic-list").classList.toggle("hidden", open);
+  progressToggleEl.querySelector(".ic-close").classList.toggle("hidden", !open);
+  progressToggleEl.setAttribute("aria-expanded", String(open));
+  progressToggleEl.title = open ? "Hide run progress" : "Show run progress";
+  if (open) {
+    pendingSteps = 0;
+    updateBadge();
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+}
 
 function backend() {
   return backendEl.value.replace(/\/+$/, "");
@@ -85,6 +116,11 @@ function line(cls, text) {
   d.innerHTML = `<span class="${cls}">${cls === "ok" ? "✓" : cls === "warn" ? "!" : "✗"}</span><span>${text}</span>`;
   logEl.appendChild(d);
   logEl.scrollTop = logEl.scrollHeight;
+  // While collapsed, surface activity on the circle without forcing it open.
+  if (!progressOpen) {
+    pendingSteps++;
+    updateBadge();
+  }
 }
 
 async function run() {
@@ -92,13 +128,20 @@ async function run() {
   if (!wf) return;
   logEl.innerHTML = "";
   downloadsEl.innerHTML = "";
+  if (progressEmptyEl) progressEmptyEl.classList.add("hidden");
   runBtn.disabled = true;
   statusEl.textContent = "Running…";
+  // Reset the circle: pulsing while running, no stale result colour or badge.
+  pendingSteps = 0;
+  updateBadge();
+  progressToggleEl.classList.remove("done-ok", "done-fail");
+  progressToggleEl.classList.add("running");
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab || !tab.id) {
     statusEl.textContent = "No active tab.";
     runBtn.disabled = false;
+    progressToggleEl.classList.remove("running");
     return;
   }
 
@@ -111,6 +154,8 @@ async function run() {
   try {
     const result = await WebBotExecutor.runWorkflow(wf, tab.id, onProgress);
     statusEl.textContent = result.ok ? "✓ Finished" : "✗ Finished with errors";
+    progressToggleEl.classList.toggle("done-ok", result.ok);
+    progressToggleEl.classList.toggle("done-fail", !result.ok);
 
     // Downloads for any produced files
     for (const [name, file] of Object.entries(result.files || {})) {
@@ -127,11 +172,14 @@ async function run() {
     }
   } catch (e) {
     statusEl.textContent = "Error: " + e.message;
+    progressToggleEl.classList.add("done-fail");
   } finally {
     runBtn.disabled = false;
+    progressToggleEl.classList.remove("running");
   }
 }
 
+progressToggleEl.addEventListener("click", () => setProgressOpen(!progressOpen));
 refreshBtn.addEventListener("click", loadWorkflows);
 runBtn.addEventListener("click", run);
 init();

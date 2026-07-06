@@ -22,7 +22,7 @@ export function NodeCard({ id, data, selected }: NodeProps) {
 
   return (
     <div
-      className={`group relative w-[210px] rounded-2xl border border-l-4 border-outline-variant ${cat.leftBar} bg-surface-container-lowest p-3 shadow-lg transition-all ${
+      className={`group relative w-[210px] min-h-[62px] max-h-[200px] min-w-[180px] max-w-[240px] rounded-2xl border border-l-4 border-outline-variant ${cat.leftBar} bg-surface-container-lowest p-3 shadow-lg transition-all ${
         selected ? `ring-2 ${cat.ring}` : ""
       }`}
     >

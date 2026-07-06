@@ -41,6 +41,33 @@
       }
       #account { font-size: 12px; color: #34d399; margin-bottom: 4px; }
       .hidden { display: none; }
+
+      /* Collapsible run progress: a circular toggle, expanded on click. */
+      #progress-bar { display: flex; justify-content: flex-end; margin-top: 10px; }
+      #progress-toggle {
+        position: relative; flex: 0 0 auto;
+        width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%;
+        background: #22d3ee; color: #0f172a; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+      }
+      #progress-toggle svg { width: 20px; height: 20px; }
+      #progress-toggle.running { animation: wb-pulse 1.2s ease-out infinite; }
+      #progress-toggle.done-ok { background: #34d399; }
+      #progress-toggle.done-fail { background: #fb7185; }
+      @keyframes wb-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.55); }
+        100% { box-shadow: 0 0 0 12px rgba(34, 211, 238, 0); }
+      }
+      #progress-badge {
+        position: absolute; top: -3px; right: -3px;
+        min-width: 16px; height: 16px; padding: 0 3px; box-sizing: border-box;
+        border-radius: 999px; background: #0f172a; color: #e5f5ff;
+        font-size: 9px; font-weight: 700; line-height: 15px; text-align: center;
+        border: 1px solid #22d3ee;
+      }
+      #progress { margin-top: 10px; }
+      #progress-empty { color: #64748b; font-size: 12px; padding: 4px 2px; }
     </style>
   </head>
   <body>
@@ -70,8 +97,27 @@
     </div>
 
     <div id="status"></div>
-    <div id="log"></div>
-    <div id="downloads"></div>
+
+    <!-- Collapsed by default to a circle; click to reveal per-step progress. -->
+    <div id="progress-bar">
+      <button id="progress-toggle" aria-expanded="false" title="Show run progress">
+        <svg class="ic-list" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round">
+          <path d="M8 6h11M8 12h11M8 18h11M3.6 6h.01M3.6 12h.01M3.6 18h.01" />
+        </svg>
+        <svg class="ic-close hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+        <span id="progress-badge" class="hidden"></span>
+      </button>
+    </div>
+
+    <div id="progress" class="hidden">
+      <div id="progress-empty">No run yet — pick a workflow and press Run.</div>
+      <div id="log"></div>
+      <div id="downloads"></div>
+    </div>
 
     <script src="config.js"></script>
     <script src="executor.js"></script>
