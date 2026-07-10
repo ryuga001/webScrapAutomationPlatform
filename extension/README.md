@@ -25,6 +25,33 @@ Re-download to refresh the token when it expires
   step on the live page via `chrome.scripting`
 - `picker.js` / `background.js` / `content-bridge.js` — the point-and-click
   element picker used by the dashboard's **Pick** button
+- `chat-assist.js` — the **Chat Assist** overlay (AI reply suggestions)
+
+## Chat Assist (AI reply suggestions)
+
+Open the popup and click **💬 Chat Assist**. An overlay lets you click-select the
+chat's **message area** and **input box** (remembered per site). It reads the
+recent conversation and suggests replies you can tweak, **Insert**, or **Send**.
+
+**Works on any chat site.** You pick the regions, so it isn't tied to one app.
+Sender detection is by message alignment (outgoing = right-aligned), which holds
+across most chat UIs; **WhatsApp Web** additionally uses an exact adapter. On apps
+that left-align every message, senders may be read as incoming — the reply
+suggestion is still generated from the conversation.
+
+Steer the output with **tone**, **persona** (who to write as), a per-reply
+**instruction**, the **conversation intent** (the goal), a **reply language**
+(non-English replies show an English translation), and an advanced **system
+prompt**. Use **🎲 Vary** for more varied options.
+
+> **Privacy:** Chat Assist sends the messages in the chat you select to your
+> WebBot backend and, from there, to **Google Gemini** to generate suggestions.
+> You're asked to consent once per browser. Only use it on conversations you're
+> comfortable processing. The AI key lives on the server — never in this extension.
+
+Requires the backend to have `GEMINI_API_KEY` configured (see the app's
+`.env`); without it the endpoint returns a 502 and the panel shows
+"AI service unavailable."
 
 ## Load it locally
 

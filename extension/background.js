@@ -158,12 +158,19 @@ async function startPick() {
 
 // ---- message router -------------------------------------------------------
 
-chrome.runtime.onMessage.addListener((msg, sender) => {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || !msg.__webbot) return;
   switch (msg.type) {
     case "RUN_WORKFLOW":
       if (msg.workflow && msg.tabId != null) startRun(msg.workflow, msg.tabId);
       break;
+    case "START_CHAT_ASSIST":
+      if (msg.tabId != null) startChatAssist(msg.tabId);
+      break;
+    case "SUGGEST_REPLIES":
+      // Async: keep the message channel open for sendResponse.
+      suggestReplies(msg).then(sendResponse);
+      return true;
     case "PAUSE_RUN":
       if (runControl && currentState) {
         runControl.paused = true;
@@ -197,3 +204,54 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
       break;
   }
 });
+
+// ---- chat assist ----------------------------------------------------------
+
+async function startChatAssist(tabId) {
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ["chat-assist.js"],
+    });
+  } catch {
+    /* page may block injection (chrome://, store pages) — nothing to do */
+  }
+}
+
+// Proxy the conversation to the backend so the API token (in chrome.storage,
+// not exposed to the injected content script) stays out of page reach.
+async function suggestReplies(msg) {
+  const { backendUrl, apiToken } = await chrome.storage.local.get([
+    "backendUrl",
+    "apiToken",
+  ]);
+  if (!backendUrl) return { error: "Not connected — open the popup and sign in first." };
+  try {
+    const res = await fetch(`${backendUrl.replace(/\/+$/, "")}/api/ai/chat-suggest`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : {}),
+      },
+      body: JSON.stringify({
+        messages: msg.messages,
+        tone: msg.tone,
+        persona: msg.persona,
+        instruction: msg.instruction,
+        intent: msg.intent,
+        systemPrompt: msg.systemPrompt,
+        language: msg.language,
+        creative: msg.creative,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 429) return { error: "Slow down — too many requests. Try again shortly." };
+      if (res.status === 401) return { error: "Sign in from the popup to use Chat Assist." };
+      return { error: data.error || "AI service unavailable." };
+    }
+    return { suggestions: data.suggestions || [] };
+  } catch {
+    return { error: "Couldn't reach the backend." };
+  }
+}

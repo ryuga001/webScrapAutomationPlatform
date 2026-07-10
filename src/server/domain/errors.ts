@@ -44,3 +44,15 @@ export class ConflictError extends AppError {
     super(message, 409, "CONFLICT");
   }
 }
+
+export class RateLimitError extends AppError {
+  constructor(message = "Too many requests — please slow down") {
+    super(message, 429, "RATE_LIMITED");
+  }
+}
+
+export class UpstreamError extends AppError {
+  constructor(message = "An upstream service is unavailable") {
+    super(message, 502, "UPSTREAM_ERROR");
+  }
+}

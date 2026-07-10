@@ -19,6 +19,18 @@ function readJwtSecret(): string {
   return DEV_SECRET;
 }
 
+function readGeminiApiKey(): string {
+  const v = process.env.GEMINI_API_KEY;
+  if (v) return v;
+  if (process.env.NODE_ENV === "production") {
+    console.warn(
+      "[config] GEMINI_API_KEY is not set — Chat Assist / AI suggestions will " +
+        "return a 502 until it is configured.",
+    );
+  }
+  return "";
+}
+
 export const config = {
   databaseUrl: process.env.DATABASE_URL ?? "",
   jwtSecret: readJwtSecret(),
@@ -27,4 +39,8 @@ export const config = {
   extensionTokenExpiresIn: process.env.EXTENSION_TOKEN_EXPIRES_IN ?? "30d",
   bcryptRounds: Number(process.env.BCRYPT_SALT_ROUNDS ?? "12"),
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  // AI (Google Gemini) for Chat Assist / suggestions.
+  geminiApiKey: readGeminiApiKey(),
+  geminiModel: process.env.GEMINI_MODEL ?? "gemini-flash-lite-latest",
+  aiRateLimitPerMin: Number(process.env.AI_RATE_LIMIT_PER_MIN ?? "20"),
 } as const;

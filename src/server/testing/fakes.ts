@@ -18,6 +18,8 @@ import type {
   WorkflowInput,
   WorkflowRunResult,
 } from "@/lib/workflow";
+import type { IAiSuggestionProvider } from "@/server/domain/ai";
+import type { ChatSuggestInput, Suggestion } from "@/lib/chat-suggest";
 
 let seq = 0;
 const id = (p: string) => `${p}_${++seq}`;
@@ -120,5 +122,19 @@ export class FakeWorkflowRepository implements IWorkflowRepository {
     if (!e || e.userId !== userId) return false;
     this.runs.push({ id, result });
     return true;
+  }
+}
+
+/** Canned AI provider; records the last input so tests can assert what it got. */
+export class FakeAiProvider implements IAiSuggestionProvider {
+  lastInput: ChatSuggestInput | null = null;
+
+  constructor(private readonly replies: string[] = ["Sure!", "Sounds good."]) {}
+
+  async suggest(input: ChatSuggestInput): Promise<Suggestion[]> {
+    this.lastInput = input;
+    return this.replies
+      .slice(0, input.count ?? this.replies.length)
+      .map((text) => ({ text }));
   }
 }

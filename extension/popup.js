@@ -15,6 +15,8 @@ const accountEl = document.getElementById("account");
 const connEl = document.getElementById("conn");
 const runBtn = document.getElementById("run");
 const refreshBtn = document.getElementById("refresh");
+const chatAssistBtn = document.getElementById("chat-assist");
+const openDashboardBtn = document.getElementById("open-dashboard");
 
 const runNameEl = document.getElementById("run-name");
 const runPillEl = document.getElementById("run-pill");
@@ -209,4 +211,21 @@ stopBtn.addEventListener("click", () => {
 refreshBtn.addEventListener("click", loadWorkflows);
 runBtn.addEventListener("click", run);
 backBtn.addEventListener("click", back);
+
+// Inject Chat Assist into the active tab, then close the popup so the in-page
+// overlay takes over.
+chatAssistBtn.addEventListener("click", async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab || !tab.id) {
+    statusEl.textContent = "No active tab for Chat Assist.";
+    return;
+  }
+  chrome.runtime.sendMessage({ __webbot: true, type: "START_CHAT_ASSIST", tabId: tab.id });
+  window.close();
+});
+
+openDashboardBtn.addEventListener("click", () => {
+  chrome.tabs.create({ url: `${backend()}/workflows` });
+});
+
 init();
